@@ -1,0 +1,33 @@
+NeSy-CML Proprietary License
+Version 1.0 – October 20, 2025
+Copyright © 2025 Lyle [Your Full Name or Alias]
+
+1. Purpose
+This license governs the use, modification, and distribution of the NeSy-CML framework. It is designed to promote the advancement of computer science while preserving the creator’s exclusive rights to commercialize the software.
+
+2. Grant of Use
+You are permitted to:
+- Use the NeSy-CML framework for research, education, experimentation, and non-commercial development.
+- Modify the codebase to improve, adapt, or extend its functionality.
+- Share modified versions for non-commercial purposes, provided proper attribution is given to the original author.
+
+3. Commercial Restrictions
+You may not:
+- Sell, license, or commercially distribute the original NeSy-CML framework or any derivative works based on it without explicit written permission from the original author.
+- Use the framework or its derivatives in any commercial product, service, or monetized platform unless authorized under Section 4.
+
+4. Conditional Commercial Authorization
+If you modify the NeSy-CML framework and can demonstrably prove that your enhancements result in tangible improvements — such as superior benchmark performance, increased efficiency, or expanded functionality — you may request commercial authorization.
+To qualify:
+- Submit documented evidence of improvement (e.g., benchmark comparisons, reproducible experiments).
+- Receive written approval from the original author confirming the validity of the improvements and granting commercial rights.
+Only upon receiving this approval may you sell or monetize your enhanced version of NeSy-CML.
+
+5. Attribution
+All public or shared uses of NeSy-CML, modified or unmodified, must include clear attribution to the original author.
+
+6. No Warranty
+This software is provided “as is,” without warranty of any kind. The author is not liable for any damages arising from its use.
+
+7. Termination
+Violation of any terms in this license will result in immediate termination of all rights granted herein.
