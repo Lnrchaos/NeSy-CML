@@ -12,10 +12,10 @@ NeuroSym-CML is a hybrid AI system that integrates:
 
 ## 🏆 Achievements
 
-- **Chess Analysis**: 67% accuracy on chess position evaluation and move prediction
-- **Poetry Generation**: 70% accuracy on style classification and creative analysis
-- **Programming**: 80% accuracy on code analysis and pattern recognition
-- **Image Processing**: 77% accuracy on visual understanding tasks
+- **Chess Analysis**: ~83% accuracy on chess position evaluation and move prediction with an F1 score of ~.92
+- **Poetry Generation**: to yet be determined accuracy on style classification and creative analysis
+- **Programming**: to yet be determined accuracy on code analysis and pattern recognition
+- **Image Processing**: to yet be determined accuracy on visual understanding tasks
 - **Multimodal Integration**: 88.5% accuracy combining multiple data types
 
 ## 📁 Project Structure
@@ -228,3 +228,4 @@ For questions, issues, or contributions:
 
 
 ** Afterthoughts**: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com Thank you all and I hope that everyone enjoys the new framework!
+
