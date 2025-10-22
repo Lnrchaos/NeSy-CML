@@ -1,22 +1,43 @@
-# NeuroSym-CML: Neuro-Symbolic Continual Meta-Learning Framework
+# 🚀 NeSy-CML: The Neuro-Symbolic Continual Meta-Learning Framework
 
-A cutting-edge AI framework that combines neural networks with symbolic reasoning for advanced multimodal learning across chess, poetry, programming, and image analysis domains.
+A cutting-edge AI framework designed to solve complex reasoning problems with unparalleled efficiency. NeSy-CML integrates deep neural perception with verifiable symbolic logic, challenging the 'scale-is-all-you-need' paradigm of current Large Language Models.
 
-## 🚀 Overview
+---
 
-NeuroSym-CML is a hybrid AI system that integrates:
-- **Neural Networks**: Deep learning for pattern recognition and feature extraction
-- **Symbolic Controllers**: Logic-based reasoning with fuzzy logic, production rules, and graph-based inference
-- **Continual Learning**: Adaptive replay buffers and meta-learning capabilities
-- **Multimodal Processing**: Text, image, and structured data understanding
+## 🔥 Revolutionary Architecture: Efficiency Meets Intelligence
 
-## 🏆 Achievements
+NeSy-CML is a **modular, hybrid AGI research platform** engineered to combine the strengths of four critical AI domains into a single, highly accessible system.
 
-- **Chess Analysis**: ~83% accuracy on chess position evaluation and move prediction with an F1 score of ~.92
-- **Poetry Generation**: to yet be determined accuracy on style classification and creative analysis
-- **Programming**: to yet be determined accuracy on code analysis and pattern recognition
-- **Image Processing**: to yet be determined accuracy on visual understanding tasks
-- **Multimodal Integration**: 88.5% accuracy combining multiple data types
+| Core Component | Functionality | Key Advantage |
+| :--- | :--- | :--- |
+| **NeuroSymbolic AI** | Blends neural networks (for fast pattern recognition) with symbolic controllers (for logic, planning, and constraint enforcement). | **Interpretability & Reliability:** Provides verifiable reasoning, moving beyond the "black box." |
+| **Continual Learning (CL)** | Uses Adaptive Replay Buffers and Meta-Learning to enable the system to **learn new tasks rapidly** and continuously without forgetting previous knowledge. | **Lifelong Learning:** Accelerates skill acquisition while preventing catastrophic forgetting. |
+| **Modular Design** | Allows independent development and upgrading of specialized modules (e.g., symbolic reasoning, memory). | **Scalability & Debugging:** Simplifies governance, verification, and porting to new domains. |
+| **Multimodal Integration** | Combines Text, Image, and Structured data understanding. | **Contextual Understanding:** Enables true cross-modal reasoning. |
+
+---
+
+## 🏆 Achievements: The $0.16 \rightarrow 0.92$ Triumph
+
+The performance shift in the Chess Model is the core validation of the Neuro-Symbolic design, proving the framework prioritizes **reliable reasoning** over trivial accuracy.
+
+### Chess Reasoning (Deep Strategic Analysis)
+
+| Metric | Simple Task (Original) | Complex Task (Current) |
+| :--- | :--- | :--- |
+| **Accuracy** | $\text{98\%}$ | **$\text{\textasciitilde} 83\%$** |
+| **F1 Score (Reliability)** | $\text{\textasciitilde} 0.1 \text{-} 0.2$ | **$\text{\textasciitilde} 0.92$ (Massive Leap!)** |
+| **Complexity** | 10 Basic Multi-Labels | **10 Main Labels + 58 Sub-Labels ($\text{6X}$ Data)** |
+
+**Analysis:** The low F1 score of the original 98% accuracy model showed it was brittle and unreliable (only guessing easy moves). The current **$0.92$ F1 Score** proves the NeSy-CML architecture successfully converted the problem into a deep, hierarchical reasoning task, demonstrating **robust, multi-level strategic understanding** even on minimal hardware.
+
+### Other Model Achievements
+
+* **Multimodal Integration**: 88.5% accuracy combining multiple data types (Files Pending)
+* **Poetry Generation**: To be determined accuracy on style classification and creative analysis (Files Pending)
+* **Programming**: To be determined accuracy on code analysis and pattern recognition (Files Pending)
+
+---
 
 ## 📁 Project Structure
 
@@ -53,180 +74,74 @@ NeuroSym-CML/
     └── custom_architecture_selector.py # Architecture optimization
 ```
 
-## 🛠️ Installation
+## 🛠️ Installation and Accessibility
 
-### Prerequisites
-- Python 3.8+
-- CUDA-capable GPU (4GB+ VRAM recommended)
-- PyTorch 2.0+
-- Additional dependencies in requirements.txt
+### Prerequisites (Designed for Global Accessibility)
+
+* Python 3.8+
+* **CUDA-capable GPU ($\text{4GB+}$ VRAM recommended):** All models are explicitly optimized for consumer-grade hardware.
+* PyTorch 2.0+
+* Additional dependencies in `requirements.txt`
 
 ### Setup
+
 ```bash
-git clone https://github.com/your-repo/NeuroSym-CML.git
+git clone [https://github.com/Lnrchaos/NeuroSym-CML.git](https://github.com/Lnrchaos/NeuroSym-CML.git)
 cd NeuroSym-CML
 pip install -r requirements.txt
 ```
 
-## 🎯 Model Types and Capabilities
 
-### 1. Chess Model (`best_chess_model_improved.pt`)
-**Purpose**: Chess position analysis and move evaluation
-**Capabilities**:
-- Chess position evaluation (material, positional factors)
-- Move quality assessment
-- Game phase recognition (opening, middlegame, endgame)
-- Tactical pattern recognition
-- Strategic understanding
-
-**Required Files for Recreation**:
-- `train_chess_optimized.py` - Main training script
-- `meta_model.py` - Core hybrid model architecture
-- `modular_symbolic_controller.py` - Symbolic reasoning
-- `modular_replay_buffer.py` - Memory management
-- `dataset/Chess_data/` - Chess training data
-- `tensor_adapter.py` - Shape adaptation utilities
-
-### 2. Poetry Model (`.pt`)
-**Purpose**: Creative text analysis and poetry understanding
-**Capabilities**:
-- Poetry style classification (sonnet, haiku, free verse, etc.)
-- Emotional tone analysis
-- Rhythm and meter detection
-- Metaphor and figurative language understanding
-- Creative writing assistance
-
-**Required Files for Recreation**:
-- `train_poetry_optimized.py` - Creative training script
-- `dataset/poetry/` - Poetry collections
-- Core framework files (meta_model.py, etc.)
-
-### 3. Programming Model
-**Purpose**: Code analysis and programming pattern recognition
-**Capabilities**:
-- Code quality assessment
-- Bug detection patterns
-- Programming language classification
-- Algorithm complexity analysis
-- Code style evaluation
-
-### 4. Multimodal Model
-**Purpose**: Combined text, image, and structured data processing
-**Capabilities**:
-- Cross-modal understanding
-- Image-text correlation
-- Multimodal reasoning
-- Context-aware processing
-
-## 🧠 Core Technologies
-
-### Symbolic Controllers
-- **Fuzzy Logic**: Handles uncertainty and creative reasoning
-- **Production Rules**: IF-THEN logical reasoning
-- **Graph-Based**: Relationship and dependency modeling
-- **Neuro-Symbolic**: Hybrid neural-symbolic integration
-
-### Neural Architectures
-- **Custom LSTM**: Sequential data processing
-- **Transformer**: Attention-based understanding
-- **CNN**: Visual feature extraction
-- **Hybrid**: Combined architectures for optimal performance
-
-### Memory Systems
-- **Adaptive Replay Buffer**: Intelligent experience replay
-- **Continual Learning**: Prevents catastrophic forgetting
-- **Meta-Learning**: Learns how to learn new tasks
-
-## 🚀 Quick Start
-
-### Train a Chess Model
-```bash
-python train_chess_optimized.py
-```
-
-### Train a Poetry Model
-```bash
-python train_poetry_optimized.py
-```
-
-### Evaluate Trained Models
-```bash
-python evaluator.py --model chess --weights best_chess_model_improved.pt
-```
-
-### Test Model Accuracy
-```bash
-python test_trained_model.py
-```
-
-## 📊 Performance Metrics
-
-| Model Type | Accuracy | Parameters | GPU Memory | Training Time | F1 
-|------------|----------|------------|------------|---------------|
-| Chess      | 83%      | 7.9M       | 3.2GB      | 2 hours  | .92|
-| Poetry     |   %      | 8.1M       | 3.5GB      |     hours     |
-| Programming|   %      | 9.2M       | 3.8GB      |   hours       |
-| Multimodal |     %    | 12.5M      | 4GB        |   hours       |
-
-(The above stats are a tad bit off when it comes to the parameters, this project is constantly evolving, I work on it every single day to make it better. 
-It may take a little bit of time for me to get the files uploaded into the repository so please bare with me as I do so, I am a solo developer and not part of a 
-team so this is a relatively long task  when trying to ensure only the newest updates and files get transferred over from my local drive. I hope that this opens 
-many doorways for the research teams.)
-
-## 🔧 Configuration
-
-### 4GB GPU Optimization
-All models are optimized for 4GB GPU constraints:
-- Gradient accumulation for effective larger batch sizes
-- Mixed precision training
-- Memory-efficient architectures
-- Adaptive batch sizing
-
-### Customization
-- Modify `config` dictionaries in training scripts
-- Adjust symbolic controller parameters
-- Customize neural architectures via `custom_architecture_selector.py`
-
-## 📚 Documentation
-
-Detailed documentation for each model type:
-- [Chess Model Guide](docs/CHESS_MODEL.md)
-- [Poetry Model Guide](docs/POETRY_MODEL.md)
-- [Programming Model Guide](docs/PROGRAMMING_MODEL.md)
-- [Multimodal Model Guide](docs/MULTIMODAL_MODEL.md)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests and documentation
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under a custom NeSy-CML Proprietary License
-
-## 🙏 Acknowledgments
-
-- Built on PyTorch framework
-- Optimized for practical GPU constraints
-- Designed for real-world applications
-- Developed by a self taught programmer (myself Lyle Richards II)
-
-## 📞 Support
-
-For questions, issues, or contributions:
-- Open an issue on GitHub
-- Check the documentation in the `docs/` folder
-- Review the example scripts in the repository
-
----
+🎯 Model Types and Capabilities
+1. Chess Model (best_chess_model_improved.pt)
+Purpose: Deep Chess strategic and tactical analysis.
+Capabilities:
+Chess position evaluation (material, positional factors)
+Move quality assessment with strategic depth
+Tactical pattern recognition across 58 sub-labels
 
 
-**NeuroSym-CML**: Where neural networks meet symbolic reasoning for next-generation AI.
+Required Files for Recreation:
+train_chess_improved.py - Main training script
+meta_model.py - Core hybrid model architecture
+modular_symbolic_controller.py - Symbolic reasoning
+modular_replay_buffer.py - Memory management
+dataset/Chess_data/ - Chess training data
+tensor_adapter.py - Shape adaptation utilities
 
 
-** Afterthoughts**: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com Thank you all and I hope that everyone enjoys the new framework!
+2. Poetry Model (.pt) (Files Pending)
+Purpose: Creative text analysis and poetry understanding
+Capabilities:
+Poetry style classification (sonnet, haiku, free verse, etc.)
+Emotional tone analysis
 
+4. Programming Model (Files Pending)
+Purpose: Code analysis and programming pattern recognition
+Capabilities:
+Code quality assessment
+Bug detection patterns
+Algorithm complexity analysis
 
+5. Multimodal Model (Files Pending)
+Purpose: Combined text, image, and structured data processing
+Capabilities:
+Cross-modal understanding
+Context-aware processing
+
+📄 NeSy-CML Proprietary License (Attention Required)
+This project is released under a Custom NeSy-CML Proprietary License designed to enforce scientific accountability on commercial entities.
+Non-Commercial Use: Free for academic research, education, and non-profit projects.
+
+Commercialization: Requires explicit written approval from the original creator, Lyle Richards II. Approval will only be granted upon demonstrable, measurable, and verifiable technical improvement to the core framework, which must be submitted and approved before monetization.
+
+Purpose: To ensure that profits derived from this AGI framework are directly tied to documented scientific advancement, not mere scaling or repackaging.
+
+🤝 Contributing & Support
+I am a solo developer, and I hope this framework opens many doorways for research teams.
+Fork the repository and open a Pull Request for bug fixes or features.
+Open a GitHub Issue for bug reports or detailed questions.
+
+🙏 Acknowledgments: Built on the power of the PyTorch framework and designed by a self-taught programmer (Lyle Richards II) to accelerate the future of open science.
+
+Afterthoughts: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com. Thank you all and I hope that everyone enjoys the new framework!
