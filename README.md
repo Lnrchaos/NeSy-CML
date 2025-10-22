@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 ## 🎯 Model Types and Capabilities
 
-### 1. Chess Model (`best_chess_model_4gb.pt`)
+### 1. Chess Model (`best_chess_model_improved.pt`)
 **Purpose**: Chess position analysis and move evaluation
 **Capabilities**:
 - Chess position evaluation (material, positional factors)
@@ -87,7 +87,7 @@ pip install -r requirements.txt
 - `dataset/Chess_data/` - Chess training data
 - `tensor_adapter.py` - Shape adaptation utilities
 
-### 2. Poetry Model (`best_poetry_model_optimized.pt`)
+### 2. Poetry Model (`.pt`)
 **Purpose**: Creative text analysis and poetry understanding
 **Capabilities**:
 - Poetry style classification (sonnet, haiku, free verse, etc.)
@@ -151,7 +151,7 @@ python train_poetry_optimized.py
 
 ### Evaluate Trained Models
 ```bash
-python evaluator.py --model chess --weights best_chess_model_4gb.pt
+python evaluator.py --model chess --weights best_chess_model_improved.pt
 ```
 
 ### Test Model Accuracy
@@ -161,12 +161,12 @@ python test_trained_model.py
 
 ## 📊 Performance Metrics
 
-| Model Type | Accuracy | Parameters | GPU Memory | Training Time |
+| Model Type | Accuracy | Parameters | GPU Memory | Training Time | F1 
 |------------|----------|------------|------------|---------------|
-| Chess      | 98%      | 7.9M       | 3.2GB      | 2 hours       |
-| Poetry     | 82%      | 8.1M       | 3.5GB      | 1.5 hours     |
-| Programming| 80%      | 9.2M       | 3.8GB      | 3 hours       |
-| Multimodal | 95.5%    | 12.5M      | 4GB        | 4 hours       |
+| Chess      | 83%      | 7.9M       | 3.2GB      | 2 hours  | .92|
+| Poetry     |   %      | 8.1M       | 3.5GB      |     hours     |
+| Programming|   %      | 9.2M       | 3.8GB      |   hours       |
+| Multimodal |     %    | 12.5M      | 4GB        |   hours       |
 
 (The above stats are a tad bit off when it comes to the parameters, this project is constantly evolving, I work on it every single day to make it better. 
 It may take a little bit of time for me to get the files uploaded into the repository so please bare with me as I do so, I am a solo developer and not part of a 
@@ -228,4 +228,5 @@ For questions, issues, or contributions:
 
 
 ** Afterthoughts**: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com Thank you all and I hope that everyone enjoys the new framework!
+
 
