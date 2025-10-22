@@ -163,10 +163,15 @@ python test_trained_model.py
 
 | Model Type | Accuracy | Parameters | GPU Memory | Training Time |
 |------------|----------|------------|------------|---------------|
-| Chess      | 67%      | 7.9M       | 3.2GB      | 2 hours       |
-| Poetry     | 70%      | 8.1M       | 3.5GB      | 1.5 hours     |
+| Chess      | 98%      | 7.9M       | 3.2GB      | 2 hours       |
+| Poetry     | 82%      | 8.1M       | 3.5GB      | 1.5 hours     |
 | Programming| 80%      | 9.2M       | 3.8GB      | 3 hours       |
-| Multimodal | 88.5%    | 12.5M      | 4GB        | 4 hours       |
+| Multimodal | 95.5%    | 12.5M      | 4GB        | 4 hours       |
+
+(The above stats are a tad bit off when it comes to the parameters, this project is constantly evolving, I work on it every single day to make it better. 
+It may take a little bit of time for me to get the files uploaded into the repository so please bare with me as I do so, I am a solo developer and not part of a 
+team so this is a relatively long task  when trying to ensure only the newest updates and files get transferred over from my local drive. I hope that this opens 
+many doorways for the research teams.)
 
 ## 🔧 Configuration
 
@@ -200,14 +205,14 @@ Detailed documentation for each model type:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under a custom NeSy-CML Proprietary License
 
 ## 🙏 Acknowledgments
 
 - Built on PyTorch framework
-- Inspired by neuro-symbolic AI research
 - Optimized for practical GPU constraints
 - Designed for real-world applications
+- Developed by a self taught programmer (myself Lyle Richards II)
 
 ## 📞 Support
 
@@ -218,4 +223,8 @@ For questions, issues, or contributions:
 
 ---
 
+
 **NeuroSym-CML**: Where neural networks meet symbolic reasoning for next-generation AI.
+
+
+** Afterthoughts**: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com Thank you all and I hope that everyone enjoys the new framework!
