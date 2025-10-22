@@ -233,7 +233,7 @@ class ImprovedChessTrainer:
             self.optimizer,
             max_lr=config.get('learning_rate', 3e-4),
             epochs=config['num_epochs'],
-            steps_per_epoch=len(ChessDataset()) // config['batch_size'] + 1,
+            steps_per_epoch=1000,  # Will be updated with actual dataset size
             pct_start=0.3,
             anneal_strategy='cos'
         )
