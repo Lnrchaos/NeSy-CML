@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chess-neuro-symbolic-training"
+version = "1.0.0"
+description = "A hybrid neuro-symbolic approach for chess position analysis that extracts and learns from comprehensive chess literature"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+maintainers = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = [
+    "chess",
+    "machine-learning", 
+    "neural-networks",
+    "symbolic-ai",
+    "pytorch",
+    "neuro-symbolic",
+    "chess-analysis",
+    "pdf-processing",
+    "multi-label-classification",
+    "hybrid-ai"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Games/Entertainment :: Board Games"
+]
+requires-python = ">=3.8"
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "transformers>=4.30.0",
+    "PyPDF2>=3.0.0",
+    "numpy>=1.24.0",
+    "tqdm>=4.65.0",
+    "matplotlib>=3.7.0",
+    "pathlib2>=2.3.0",
+    "python-dateutil>=2.8.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0"
+]
+viz = [
+    "seaborn>=0.12.0",
+    "plotly>=5.0.0"
+]
+metrics = [
+    "scikit-learn>=1.3.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/chess-neuro-symbolic-training"
+Repository = "https://github.com/yourusername/chess-neuro-symbolic-training.git"
+Issues = "https://github.com/yourusername/chess-neuro-symbolic-training/issues"
+Documentation = "https://github.com/yourusername/chess-neuro-symbolic-training#readme"
+
+[project.scripts]
+chess-train = "train_chess_improved:main"
+chess-test = "examples.test_chess_labeling:main"
+chess-analyze = "examples.comprehensive_chess_test:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["tests*", "examples*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
