@@ -7,7 +7,7 @@ Optimized for both 4GB GPU constraints AND high performance
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset, WeightedRandomSampler
 import torch.nn.functional as F
 from torch.amp import GradScaler, autocast
 import os
@@ -24,9 +24,6 @@ from modular_symbolic_controller import create_symbolic_controller
 from modular_replay_buffer import create_replay_buffer
 import PyPDF2
 import re
-from data_module import ContinualDataset, TextEncoder
-from evaluator import evaluate
-from dataset_wrapper import CIFAR10Wrapper, MNISTWrapper
 from tensor_adapter import create_symbolic_adapter, ReplayBufferAdapter, ModelOutputAdapter
 
 class FullChessDataset:
@@ -146,11 +143,11 @@ class FullChessDataset:
         return torch.tensor(encoded, dtype=torch.long)
     
     def _create_labels(self, text: str):
-        """Enhanced labeling with comprehensive chess terminology"""
-        labels = torch.zeros(10)
+        """Enhanced labeling with comprehensive chess terminology (draw class removed)"""
+        labels = torch.zeros(9)
         text_lower = text.lower()
         
-        # Comprehensive chess labeling system
+        # Comprehensive chess labeling system (no 'draw' class)
         tactics_terms = ['tactics', 'tactical', 'pin', 'fork', 'skewer', 'combination', 'sacrifice']
         strategy_terms = ['strategy', 'strategic', 'plan', 'positional', 'initiative', 'outpost']
         opening_terms = ['opening', 'development', 'castle', 'gambit', 'sicilian', 'french']
@@ -160,7 +157,6 @@ class FullChessDataset:
         middlegame_terms = ['middlegame', 'middle game', 'attack', 'defense', 'calculation']
         evaluation_terms = ['good move', 'mistake', 'blunder', 'advantage', 'analysis']
         checkmate_terms = ['checkmate', 'mate', 'mating', 'check', 'forced mate']
-        draw_terms = ['draw', 'stalemate', 'repetition', 'fifty move rule', 'fortress']
         
         if any(term in text_lower for term in tactics_terms): labels[0] = 1
         if any(term in text_lower for term in strategy_terms): labels[1] = 1
@@ -171,7 +167,6 @@ class FullChessDataset:
         if any(term in text_lower for term in middlegame_terms): labels[6] = 1
         if any(term in text_lower for term in evaluation_terms): labels[7] = 1
         if any(term in text_lower for term in checkmate_terms): labels[8] = 1
-        if any(term in text_lower for term in draw_terms): labels[9] = 1
         
         return labels
     
@@ -192,19 +187,16 @@ class ImprovedChessTrainer:
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
         
-        # Initialize advanced text encoder for better text understanding
-        self.text_encoder = TextEncoder(model_name="openai/clip-vit-base-patch32")
-        
-        # Create improved model
+        # Create improved model (lightweight enough for 4GB)
         self.model = self._create_improved_model()
         
         # Use custom tensor adapter for symbolic controller
         self.symbolic_adapter = create_symbolic_adapter(
-            text_size=512,  # ChessDataset text encoding size
+            text_size=config.get('text_encoding_size', 256),  # match dataset encoding length
             controller_size=256
         ).to(self.device)
         
-        # Use ProductionRuleController with adapter
+        # Use ProductionRuleController with adapter (kept small)
         self.symbolic_controller = create_symbolic_controller(
             controller_type='production_rule',
             num_rules=config.get('rule_set_size', 75),
@@ -212,37 +204,46 @@ class ImprovedChessTrainer:
             hidden_size=64
         ).to(self.device)
         
-        # Use text replay buffer properly for experience replay
+        # Use text replay buffer properly for experience replay (modest size)
         self.replay_buffer = create_replay_buffer(
             buffer_type='text',
-            memory_size=config.get('replay_buffer_size', 8000),
+            memory_size=config.get('replay_buffer_size', 6000),
             device=str(self.device)
         )
         
-        # Advanced optimizer with better hyperparameters
+        # Optimizer
         self.optimizer = optim.AdamW(
             self.model.parameters(),
-            lr=config.get('learning_rate', 3e-4),  # Higher learning rate
+            lr=config.get('learning_rate', 3e-4),
             betas=(0.9, 0.999),
-            weight_decay=config.get('weight_decay', 1e-4),  # Higher weight decay
+            weight_decay=config.get('weight_decay', 1e-4),
             amsgrad=True
         )
         
-        # Better scheduler
+        # Scheduler with correct steps_per_epoch for stability/memory predictability
         self.scheduler = optim.lr_scheduler.OneCycleLR(
             self.optimizer,
             max_lr=config.get('learning_rate', 3e-4),
             epochs=config['num_epochs'],
-            steps_per_epoch=1000,  # Will be updated with actual dataset size
+            steps_per_epoch=max(1, config.get('steps_per_epoch', 100)),
             pct_start=0.3,
             anneal_strategy='cos'
         )
         
         # Mixed precision
-        self.scaler = GradScaler('cuda') if torch.cuda.is_available() else None
+        self.scaler = GradScaler('cuda') if torch.cuda.is_available() and config.get('mixed_precision', True) else None
         
-        # Improved loss with class weighting
-        self.criterion = self._create_improved_loss()
+        # Class weights for BCE (improves F1 on imbalanced data)
+        self.pos_weights = None
+        if config.get('pos_weights') is not None:
+            pw = torch.tensor(config['pos_weights'], dtype=torch.float32)
+            self.pos_weights = pw.to(self.device)
+        
+        # Improved loss with focal + pos_weight support
+        self.criterion = self._create_improved_loss(self.pos_weights)
+        
+        # Thresholds for multi-label decisions (calibrated on eval)
+        self.thresholds = torch.full((config.get('num_classes', 10),), 0.5, dtype=torch.float32, device=self.device)
         
         # Gradient accumulation
         self.gradient_accumulation_steps = config.get('gradient_accumulation_steps', 4)
@@ -257,7 +258,7 @@ class ImprovedChessTrainer:
         print(f"   Model Parameters: {sum(p.numel() for p in self.model.parameters()):,}")
         print(f"   Batch Size: {config['batch_size']} (Effective: {config['batch_size'] * self.gradient_accumulation_steps})")
         print(f"   Learning Rate: {config.get('learning_rate', 3e-4)}")
-        print(f"   High Accuracy Mode: Focal loss, threshold=0.5, balanced")
+        print(f"   F1 Mode: focal loss + pos_weight, per-class thresholds")
         print(f"   Advanced Features: Enabled")
     
     def _create_improved_model(self) -> nn.Module:
@@ -353,31 +354,37 @@ class ImprovedChessTrainer:
             num_classes=self.config.get('num_classes', 10)
         ).to(self.device)
     
-    def _create_improved_loss(self) -> nn.Module:
-        """Create improved loss function for high accuracy"""
+    def _create_improved_loss(self, pos_weights: Optional[torch.Tensor]) -> nn.Module:
+        """Create improved loss function for high accuracy under class imbalance"""
         class ImprovedChessLoss(nn.Module):
-            def __init__(self):
+            def __init__(self, pos_weights: Optional[torch.Tensor] = None):
                 super().__init__()
-                # Balanced focal loss for high accuracy
-                self.alpha = 0.25
-                self.gamma = 2.0
+                self.alpha = 0.25  # focal alpha
+                self.gamma = 2.0   # focal gamma
+                self.pos_weights = pos_weights
             
             def focal_loss(self, inputs, targets):
-                """Focal loss for better learning"""
-                bce_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
+                # BCE with logits supports class-wise pos_weight for imbalance
+                bce_loss = F.binary_cross_entropy_with_logits(
+                    inputs, targets.float(), pos_weight=self.pos_weights, reduction='none'
+                )
                 pt = torch.exp(-bce_loss)
-                focal_loss = self.alpha * (1 - pt) ** self.gamma * bce_loss
-                return focal_loss.mean()
+                focal = self.alpha * (1 - pt) ** self.gamma * bce_loss
+                return focal.mean()
             
             def forward(self, outputs, targets):
                 return self.focal_loss(outputs, targets)
         
-        return ImprovedChessLoss()
+        return ImprovedChessLoss(pos_weights)
     
     def _calculate_advanced_metrics(self, outputs: torch.Tensor, labels: torch.Tensor) -> Dict[str, float]:
         """Calculate advanced metrics for high accuracy"""
-        # Use standard threshold for high accuracy
-        predictions = torch.sigmoid(outputs) > 0.5
+        probs = torch.sigmoid(outputs)
+        # Use per-class thresholds if available
+        thr = self.thresholds.to(probs.device)
+        while thr.dim() < probs.dim():
+            thr = thr.unsqueeze(0)
+        predictions = probs > thr
         labels_bool = labels.bool()
         
         # Calculate per-class metrics
@@ -412,11 +419,12 @@ class ImprovedChessTrainer:
         labels = batch['labels'].to(self.device)
         
         # Handle labels properly
-        if labels.dim() == 1 and labels.size(0) == 10:
+        num_classes = self.config.get('num_classes', 9)
+        if labels.dim() == 1 and labels.size(0) == num_classes:
             labels = labels.unsqueeze(0)
         elif labels.dim() > 2:
             labels = labels.squeeze()
-            if labels.dim() == 1 and labels.size(0) == 10:
+            if labels.dim() == 1 and labels.size(0) == num_classes:
                 labels = labels.unsqueeze(0)
         
         # Only zero gradients at start of accumulation
@@ -498,11 +506,11 @@ class ImprovedChessTrainer:
             labels = batch['labels'].to(self.device)
             
             # Handle labels
-            if labels.dim() == 1 and labels.size(0) == 10:
+            if labels.dim() == 1 and labels.size(0) == self.config.get('num_classes', 10):
                 labels = labels.unsqueeze(0)
             elif labels.dim() > 2:
                 labels = labels.squeeze()
-                if labels.dim() == 1 and labels.size(0) == 10:
+                if labels.dim() == 1 and labels.size(0) == self.config.get('num_classes', 10):
                     labels = labels.unsqueeze(0)
             
             # Forward pass with custom tensor adapter
@@ -550,7 +558,56 @@ class ImprovedChessTrainer:
         
         return metrics
     
-    def train(self, dataloader: DataLoader, num_epochs: int):
+    def _calibrate_thresholds(self, eval_loader: DataLoader, max_batches: int = 2) -> None:
+        """Calibrate per-class thresholds to maximize macro-F1 on a small eval subset."""
+        self.model.eval()
+        sigmoids, all_labels = [], []
+        batches = 0
+        with torch.no_grad():
+            for batch in eval_loader:
+                text_encodings = batch['text_encoding'].to(self.device)
+                labels = batch['labels'].to(self.device)
+                if labels.dim() == 1 and labels.size(0) == self.config.get('num_classes', 10):
+                    labels = labels.unsqueeze(0)
+                elif labels.dim() > 2:
+                    labels = labels.squeeze()
+                    if labels.dim() == 1 and labels.size(0) == self.config.get('num_classes', 10):
+                        labels = labels.unsqueeze(0)
+                adapted_input = self.symbolic_adapter.adapt_text_for_controller(text_encodings.float())
+                rule_indices, _ = self.symbolic_controller(adapted_input)
+                rule_indices = self.symbolic_adapter.adapt_rule_indices(rule_indices, text_encodings.size(0))
+                dummy_images = torch.zeros(text_encodings.size(0), 3, 32, 32).to(self.device)
+                outputs = self.model(dummy_images, text_encodings, rule_indices)
+                sigmoids.append(torch.sigmoid(outputs).detach().cpu())
+                all_labels.append(labels.detach().cpu())
+                batches += 1
+                if batches >= max_batches:
+                    break
+        if not sigmoids:
+            return
+        probs = torch.cat(sigmoids, dim=0)
+        labels = torch.cat(all_labels, dim=0).bool()
+        num_classes = probs.size(1)
+        best_thr = torch.full((num_classes,), 0.5)
+        thr_grid = torch.linspace(0.3, 0.7, steps=9)
+        for c in range(num_classes):
+            best_f1 = -1.0
+            p = probs[:, c]
+            y = labels[:, c]
+            for t in thr_grid:
+                preds = p > t
+                tp = (preds & y).sum().item()
+                fp = (preds & ~y).sum().item()
+                fn = ((~preds) & y).sum().item()
+                prec = tp / (tp + fp + 1e-8)
+                rec = tp / (tp + fn + 1e-8)
+                f1 = 2 * prec * rec / (prec + rec + 1e-8)
+                if f1 > best_f1:
+                    best_f1 = f1
+                    best_thr[c] = t
+        self.thresholds = best_thr.to(self.device)
+    
+    def train(self, dataloader: DataLoader, num_epochs: int, eval_loader: Optional[DataLoader] = None):
         """Improved training loop with better monitoring"""
         print(f"🚀 Starting improved chess training for {num_epochs} epochs...")
         
@@ -574,7 +631,7 @@ class ImprovedChessTrainer:
                             'labels': replay_batch['labels']
                         }
                         # Train on replay data
-                        replay_metrics = self.train_step(replay_data, batch_idx + 1000)  # Offset for accumulation
+                        _ = self.train_step(replay_data, batch_idx + 1000)  # Offset for accumulation
                 
                 for key in train_metrics:
                     if key in metrics:
@@ -594,13 +651,14 @@ class ImprovedChessTrainer:
             
             # Average metrics
             for key in train_metrics:
-                train_metrics[key] /= num_batches
+                train_metrics[key] /= max(1, num_batches)
             
             # Evaluation phase
             eval_metrics = {'loss': 0.0, 'accuracy': 0.0, 'f1_score': 0.0, 'precision': 0.0, 'recall': 0.0}
             eval_batches = 0
             
-            for batch in dataloader:
+            eval_iter = eval_loader if eval_loader is not None else dataloader
+            for batch in eval_iter:
                 metrics = self.evaluate_step(batch)
                 for key in eval_metrics:
                     if key in metrics:
@@ -608,7 +666,22 @@ class ImprovedChessTrainer:
                 eval_batches += 1
             
             for key in eval_metrics:
-                eval_metrics[key] /= eval_batches
+                eval_metrics[key] /= max(1, eval_batches)
+            
+            # Optional: calibrate thresholds for better F1
+            if self.config.get('calibrate_thresholds', True):
+                self._calibrate_thresholds(eval_iter if eval_loader is not None else dataloader, max_batches=2)
+                # Recompute eval metrics with calibrated thresholds (quick pass)
+                eval_metrics = {'loss': 0.0, 'accuracy': 0.0, 'f1_score': 0.0, 'precision': 0.0, 'recall': 0.0}
+                eval_batches = 0
+                for batch in eval_iter:
+                    metrics = self.evaluate_step(batch)
+                    for key in eval_metrics:
+                        if key in metrics:
+                            eval_metrics[key] += metrics[key]
+                    eval_batches += 1
+                for key in eval_metrics:
+                    eval_metrics[key] /= max(1, eval_batches)
             
             # Save results
             epoch_results = {
@@ -634,6 +707,7 @@ class ImprovedChessTrainer:
                     'optimizer_state_dict': self.optimizer.state_dict(),
                     'f1_score': self.best_f1_score,
                     'accuracy': self.best_accuracy,
+                    'thresholds': self.thresholds.detach().cpu().tolist(),
                     'config': self.config,
                     'training_history': self.training_history
                 }, 'best_chess_model_improved.pt')
@@ -647,14 +721,12 @@ class ImprovedChessTrainer:
         # Final comprehensive evaluation
         print(f"\n🔍 Running comprehensive final evaluation...")
         try:
-            # Note: The evaluate function expects different model output format
-            # So we'll do our own comprehensive evaluation
-            self._comprehensive_evaluation(dataloader)
+            self._comprehensive_evaluation(eval_loader if eval_loader is not None else dataloader)
         except Exception as e:
             print(f"Comprehensive evaluation failed: {e}")
         
         # Analyze class balance
-        self._analyze_class_balance(dataloader)
+        self._analyze_class_balance(eval_loader if eval_loader is not None else dataloader)
         
         print(f"\n🎉 Improved chess training completed!")
         print(f"Best F1 Score: {self.best_f1_score:.4f}")
@@ -665,30 +737,31 @@ class ImprovedChessTrainer:
         print(f"\n📊 Class Balance Analysis:")
         print(f"=" * 40)
         
-        class_counts = torch.zeros(10)
+        num_classes = self.config.get('num_classes', 9)
+        class_counts = torch.zeros(num_classes)
         total_samples = 0
         
         for batch in dataloader:
             labels = batch['labels'].to(self.device)
-            if labels.dim() == 1 and labels.size(0) == 10:
+            if labels.dim() == 1 and labels.size(0) == num_classes:
                 labels = labels.unsqueeze(0)
             elif labels.dim() > 2:
                 labels = labels.squeeze()
-                if labels.dim() == 1 and labels.size(0) == 10:
+                if labels.dim() == 1 and labels.size(0) == num_classes:
                     labels = labels.unsqueeze(0)
             
             class_counts += labels.sum(dim=0).cpu()
             total_samples += labels.size(0)
         
         class_names = ['tactics', 'strategy', 'opening', 'endgame', 'pieces', 
-                      'notation', 'middlegame', 'evaluation', 'checkmate', 'draw']
+                      'notation', 'middlegame', 'evaluation', 'checkmate']
         
         print("Class Distribution:")
         for i, (name, count) in enumerate(zip(class_names, class_counts)):
-            percentage = (count / total_samples) * 100
+            percentage = (count / max(1, total_samples)) * 100
             print(f"  {name:12}: {count:3.0f}/{total_samples} ({percentage:5.1f}%)")
         
-        avg_positive_rate = (class_counts.sum() / (total_samples * 10)) * 100
+        avg_positive_rate = (class_counts.sum() / (max(1, total_samples) * num_classes)) * 100
         print(f"\nOverall positive rate: {avg_positive_rate:.1f}%")
         print(f"This explains why F1 is low - very imbalanced classes!")
         print(f"=" * 40)
@@ -707,11 +780,12 @@ class ImprovedChessTrainer:
                 labels = batch['labels'].to(self.device)
                 
                 # Handle labels
-                if labels.dim() == 1 and labels.size(0) == 10:
+                num_classes = self.config.get('num_classes', 9)
+                if labels.dim() == 1 and labels.size(0) == num_classes:
                     labels = labels.unsqueeze(0)
                 elif labels.dim() > 2:
                     labels = labels.squeeze()
-                    if labels.dim() == 1 and labels.size(0) == 10:
+                    if labels.dim() == 1 and labels.size(0) == num_classes:
                         labels = labels.unsqueeze(0)
                 
                 # Forward pass with proper shape handling
@@ -768,9 +842,9 @@ class ImprovedChessTrainer:
         print(f"\n📊 Comprehensive Chess AI Analysis:")
         print(f"=" * 50)
         
-        # Per-class analysis
+        # Per-class analysis (draw removed)
         class_names = ['tactics', 'strategy', 'opening', 'endgame', 'pieces', 
-                      'notation', 'middlegame', 'evaluation', 'checkmate', 'draw']
+                      'notation', 'middlegame', 'evaluation', 'checkmate']
         
         for i, class_name in enumerate(class_names):
             if i < all_labels.size(1):
@@ -795,26 +869,70 @@ class ImprovedChessTrainer:
         
         print(f"=" * 50)
 
+def _compute_pos_weights(ds) -> List[float]:
+    # Compute class-wise pos_weight = neg/pos
+    if len(ds) == 0:
+        return []
+    num_classes = ds[0]['labels'].numel()
+    counts = torch.zeros(num_classes)
+    for i in range(len(ds)):
+        labels = ds[i]['labels']
+        counts += labels
+    pos = counts
+    neg = len(ds) - counts
+    pos_weights = []
+    for i in range(num_classes):
+        if pos[i] > 0:
+            pos_weights.append((neg[i] / pos[i]).item())
+        else:
+            pos_weights.append(1.0)
+    return pos_weights
+
+
+def _make_weighted_sampler(ds) -> WeightedRandomSampler:
+    # Weight each sample by the rarity of its positive classes (min rarity among its labels)
+    if len(ds) == 0:
+        return WeightedRandomSampler(weights=[1.0], num_samples=1, replacement=True)
+    num_classes = ds[0]['labels'].numel()
+    counts = torch.zeros(num_classes)
+    for i in range(len(ds)):
+        counts += ds[i]['labels']
+    total = len(ds)
+    sample_weights = []
+    for i in range(len(ds)):
+        labels = ds[i]['labels']
+        if labels.sum() > 0:
+            active = (labels > 0).nonzero().flatten()
+            rarest = counts[active].min().item()
+            w = total / (rarest + 1)
+        else:
+            w = 1.0
+        sample_weights.append(w)
+    return WeightedRandomSampler(weights=sample_weights, num_samples=max(total, 1) * 2, replacement=True)
+
+
 def main():
     """Main function with improved configuration"""
     config = {
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
-        'num_classes': 10,
+'num_classes': 9,
         'max_length': 256,
         'batch_size': 2,  # Small for 4GB GPU
-        'learning_rate': 3e-4,  # Higher learning rate
-        'weight_decay': 1e-4,  # Higher weight decay
-        'num_epochs': 25,  # More epochs for better learning
+        'learning_rate': 3e-4,
+        'weight_decay': 1e-4,
+        'num_epochs': 25,
         'rule_set_size': 75,
-        'replay_buffer_size': 8000,
+        'replay_buffer_size': 6000,
         'gradient_accumulation_steps': 4,
-        'mixed_precision': True
+        'mixed_precision': True,
+        'calibrate_thresholds': True,
+        'text_encoding_size': 256
     }
     
     print("♟️ Improved High-Performance Chess Training (4GB GPU)")
     print("=" * 60)
     print("🎯 Target: High accuracy with advanced techniques")
-    print("🔧 Advanced optimizations: Focal loss, attention, F1 tracking")
+    print("🔧 Advanced optimizations: Focal loss, pos_weight, attention, F1 tracking")
     print("=" * 60)
     
     # Create FULL dataset using ALL your rich chess content
@@ -823,19 +941,54 @@ def main():
         print("❌ No chess data found!")
         return
     
-    dataloader = DataLoader(
-        dataset,
+    # Split into train/val (80/20)
+    indices = torch.randperm(len(dataset)).tolist()
+    val_size = max(1, int(0.2 * len(indices)))
+    val_indices = indices[:val_size]
+    train_indices = indices[val_size:]
+    train_ds = Subset(dataset, train_indices)
+    val_ds = Subset(dataset, val_indices)
+    
+    # Compute class weights on train set (Subset -> use underlying dataset)
+    # Build a lightweight view to iterate labels
+    class _View:
+        def __init__(self, subset):
+            self.subset = subset
+        def __len__(self):
+            return len(self.subset)
+        def __getitem__(self, i):
+            return self.subset.dataset[self.subset.indices[i]]
+    train_view = _View(train_ds)
+
+    pos_weights = _compute_pos_weights(train_view)
+    config['pos_weights'] = pos_weights
+    
+    # Optional weighted sampler for train
+    sampler = _make_weighted_sampler(train_view)
+
+    train_loader = DataLoader(
+        train_ds,
         batch_size=config['batch_size'],
-        shuffle=True,
+        sampler=sampler,
         num_workers=0,
-        pin_memory=False
+        pin_memory=(config['device'] == 'cuda')
     )
+    eval_loader = DataLoader(
+        val_ds,
+        batch_size=config['batch_size'],
+        shuffle=False,
+        num_workers=0,
+        pin_memory=(config['device'] == 'cuda')
+    )
+
+    # steps_per_epoch for scheduler
+    config['steps_per_epoch'] = max(1, len(train_loader))
     
     # Create improved trainer
     trainer = ImprovedChessTrainer(config)
     
     # Train the model
-    trainer.train(dataloader, config['num_epochs'])
+    trainer.train(train_loader, config['num_epochs'], eval_loader=eval_loader)
     
     # Save results
     results = {
