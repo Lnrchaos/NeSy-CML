@@ -74,25 +74,6 @@ Draw:       0.266 (26.6% accuracy) ✅ Decent
 - **Focal Loss**: Handles class imbalance intelligently
 - **Multi-Label Output**: 10 simultaneous binary classifications
 
-## 📁 **Repository Structure**
-
-```
-chess-neuro-symbolic-ai/
-├── train_chess_improved.py          # Main training script
-├── meta_model.py                    # Hybrid neural-symbolic model
-├── modular_symbolic_controller.py   # Chess reasoning logic
-├── modular_replay_buffer.py         # Experience replay system
-├── data_module.py                   # Advanced data processing
-├── text_encoder.py                  # Chess text encoding
-├── tensor_adapter.py                # Multi-label utilities
-├── evaluator.py                     # Performance evaluation
-├── requirements.txt                 # Dependencies
-├── dataset/
-│   └── Chess_data/                  # Your chess PDF library
-└── examples/
-    ├── test_chess_labeling.py       # Test the 59 sub-concepts
-    └── comprehensive_chess_test.py  # Full dataset analysis
-```
 
 ## 🚀 **Quick Start**
 
@@ -216,7 +197,7 @@ We welcome contributions to improve:
 
 ## 📄 **License**
 
-MIT License - Perfect for research, education, and commercial chess applications.
+NeSy-CML Proprietary License
 
 ---
 
@@ -228,5 +209,6 @@ MIT License - Perfect for research, education, and commercial chess applications
 ✅ **91.8% F1 score** for chess piece recognition  
 ✅ **181x more training data** than traditional approaches  
 ✅ **Professional-grade performance** suitable for real applications  
+
 
 **Transform your chess book collection into a powerful AI training dataset!** 🚀♟️
