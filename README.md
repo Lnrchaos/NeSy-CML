@@ -56,7 +56,7 @@ NeuroSym-CML/
 │   ├── modular_replay_buffer.py    # Adaptive memory systems
 │   └── tensor_adapter.py           # Tensor shape adaptation utilities
 ├── training/                       # Training scripts
-│   ├── train_chess_optimized.py   # Optimized chess training
+│   ├── train_chess_improved.py   # Optimized chess training
 │   ├── train_poetry_optimized.py  # Creative poetry training
 │   ├── train_programming.py       # Code analysis training
 │   └── train_multimodal_newson.py # Multimodal training
