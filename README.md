@@ -142,6 +142,20 @@ I am a solo developer, and I hope this framework opens many doorways for researc
 Fork the repository and open a Pull Request for bug fixes or features.
 Open a GitHub Issue for bug reports or detailed questions.
 
+IMPORTANT NOTE ON LATEST RELEASE (Oct 23, 2025): Thank you for the massive initial interest!
+I am actively restructuring the training files folowwing recent upgrades. The core 
+architecture files are stable, but a lot of the main training scripts are currently broken
+due to how many times I had to optimize and improve to ensure that they worked on a 
+4GB GPU so that more developers could have access. Also there seems to be dataset issues,
+I will get to the bottom of that at some point today and figure out what keeps stalling
+the train_chess_improved.py file. Of course, the training files were just to be examples 
+to prooof of work that this framework does indeed work. I plan to make some test files 
+for things like XOR test among other tests to ensure and show that the model is in fact
+what I have said it is. Again, Thank You all for your huge support and I hope that this 
+project becomes the face of the next generation AI models, I can see great things in it 
+and I'm just hopeful the rest of you do to.
+
 🙏 Acknowledgments: Built on the power of the PyTorch framework and designed by a self-taught programmer (Lyle Richards II) to accelerate the future of open science.
 
 Afterthoughts: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com. Thank you all and I hope that everyone enjoys the new framework!
+
