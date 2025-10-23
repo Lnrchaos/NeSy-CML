@@ -74,6 +74,17 @@ NeuroSym-CML/
     └── custom_architecture_selector.py # Architecture optimization
 ```
 
+## Traction: Proof of Concept
+NeSy-CML’s NeuroSymbolic framework is pulling devs in—open for research, not profit!
+
+| Metric          | First 38 Hours (Discord Drops) |
+|-----------------|-------------------------------|
+| Total Views     | 320                           |
+| Unique Visitors | 20                            |
+| Total Clones    | 69                            |
+| Unique Clones   | 56                            |
+
+**License**: Free for research; commercial use requires approval. See LICENSE.md.
 ## 🛠️ Installation and Accessibility
 
 ### Prerequisites (Designed for Global Accessibility)
@@ -158,4 +169,5 @@ and I'm just hopeful the rest of you do to.
 🙏 Acknowledgments: Built on the power of the PyTorch framework and designed by a self-taught programmer (Lyle Richards II) to accelerate the future of open science.
 
 Afterthoughts: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com. Thank you all and I hope that everyone enjoys the new framework!
+
 
