@@ -87,7 +87,7 @@ NeuroSym-CML/
     └── custom_architecture_selector.py # Architecture optimization
 ```
 
-## � Resetarch Contributions
+## � Research Contributions
 
 ### 1. **Fixed Evaluation Methodology**
 Identified and fixed critical bugs in NeuroSymbolic evaluation that were causing metric confusion:
@@ -205,3 +205,4 @@ Open a GitHub Issue for bug reports or detailed questions.
 Afterthoughts: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. 
 It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. 
 If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com. Thank you all and I hope that everyone enjoys the new framework!
+
