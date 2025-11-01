@@ -3,6 +3,9 @@
 A research framework combining neural networks with symbolic reasoning for interpretable AI. NeSy-CML demonstrates how hybrid architectures can achieve high performance on complex reasoning tasks while maintaining transparency and reliability.
 
 ---
+## Featured In
+- [Smol AI News - Oct 22, 2025](https://news.smol.ai/issues/25-10-22-not-much)
+- [MiraclePlus Spotlight](https://news.miracleplus.com/share_link/94212)
 
 ## 🎯 Core Architecture: Neural + Symbolic Hybrid
 
@@ -205,4 +208,5 @@ Open a GitHub Issue for bug reports or detailed questions.
 Afterthoughts: I will eventually get something up for potential tipping of some sort that will go as funds towards my research in AI and Quantum computing. 
 It is kind of hard to do things like this when lacking the funding for the research and the development time so any help is much appreciated. 
 If anyone chooses they can tip whatever they feel led to tip at my paypal lylerichards17@gmail.com. Thank you all and I hope that everyone enjoys the new framework!
+
 
