@@ -424,54 +424,117 @@ class SecureImageTrainer:
         return checkpoint
     
     def _meta_learning_step(self):
-        """Perform meta-learning step using replay buffer"""
+        """Advanced MAML-based meta-learning step using replay buffer"""
         try:
-            # Sample batch from replay buffer
-            meta_batch = self.replay_buffer.sample(self.config.get('meta_batch_size', 4))
+            # Sample meta-batch of tasks from replay buffer
+            meta_batch_size = self.config.get('meta_batch_size', 4)
+            inner_lr = self.config.get('inner_lr', 0.01)
+            outer_lr = self.config.get('outer_lr', 0.001)
+            inner_steps = self.config.get('inner_steps', 1)
             
-            if meta_batch is None:
+            # Sample diverse tasks from replay buffer
+            meta_tasks = []
+            for _ in range(meta_batch_size):
+                task_batch = self.replay_buffer.sample(batch_size=16)  # Support + Query sets
+                if task_batch is not None:
+                    meta_tasks.append(task_batch)
+            
+            if not meta_tasks:
                 return
             
-            # Inner loop: adapt to each task in the meta-batch
-            inner_losses = []
-            for task in meta_batch:
-                # Quick adaptation step
-                images, texts, rules, targets, outputs = task
-                images = images.to(self.device)
-                texts = texts.to(self.device)
-                rules = rules.to(self.device)
-                targets = targets.to(self.device)
-                
-                # Convert rule indices to embeddings for prior state
-                rule_embeddings = torch.zeros(rules.size(0), 64, device=self.device)
-                for i, rule_idx in enumerate(rules):
-                    rule_embeddings[i, rule_idx % 64] = 1.0  # Simple one-hot encoding
-                
-                # Forward pass
-                enhanced_rules, _ = self.symbolic_controller.forward(
-                    x=images.flatten(1),
-                    task_metadata={'id': 0, 'type': 'image_analysis'},
-                    prior_state=rule_embeddings
-                )
-                outputs = self.model(images, texts, rules)
-                loss = F.binary_cross_entropy_with_logits(outputs, targets)
-                inner_losses.append(loss)
+            # Store original parameters
+            original_params = {name: param.clone() for name, param in self.model.named_parameters()}
             
-            # Outer loop: update meta-parameters
-            if inner_losses:
-                meta_loss = torch.stack(inner_losses).mean()
-                meta_loss.backward()
+            # Meta-gradient accumulator
+            meta_gradients = {name: torch.zeros_like(param) for name, param in self.model.named_parameters()}
+            
+            # Process each task in meta-batch
+            for task_idx, task_batch in enumerate(meta_tasks):
+                # Split into support and query sets (8 support, 8 query)
+                images, texts, rules, targets, outputs = task_batch
+                mid_point = len(images) // 2
                 
-                # Update with meta-learning rate
-                for param in self.model.parameters():
-                    if param.grad is not None:
-                        param.data -= self.config.get('outer_lr', 0.001) * param.grad.data
+                support_images = images[:mid_point].to(self.device)
+                support_texts = texts[:mid_point].to(self.device) 
+                support_rules = rules[:mid_point].to(self.device)
+                support_targets = targets[:mid_point].to(self.device)
                 
-                # Clear gradients
-                self.optimizer.zero_grad()
+                query_images = images[mid_point:].to(self.device)
+                query_texts = texts[mid_point:].to(self.device)
+                query_rules = rules[mid_point:].to(self.device)
+                query_targets = targets[mid_point:].to(self.device)
                 
+                # Reset to original parameters for each task
+                for name, param in self.model.named_parameters():
+                    param.data.copy_(original_params[name])
+                
+                # Inner loop: Fast adaptation on support set
+                fast_weights = {}
+                for step in range(inner_steps):
+                    # Forward pass on support set
+                    support_outputs = self.model(support_images, support_texts, support_rules)
+                    support_loss = F.binary_cross_entropy_with_logits(support_outputs, support_targets)
+                    
+                    # Compute gradients w.r.t. current parameters
+                    grads = torch.autograd.grad(
+                        support_loss, 
+                        self.model.parameters(), 
+                        create_graph=True,  # Enable higher-order gradients
+                        retain_graph=True
+                    )
+                    
+                    # Update fast weights (gradient descent step)
+                    fast_weights = {}
+                    for (name, param), grad in zip(self.model.named_parameters(), grads):
+                        if name not in fast_weights:
+                            fast_weights[name] = param - inner_lr * grad
+                        else:
+                            fast_weights[name] = fast_weights[name] - inner_lr * grad
+                    
+                    # Apply fast weights to model
+                    with torch.no_grad():
+                        for name, param in self.model.named_parameters():
+                            param.copy_(fast_weights[name])
+                
+                # Outer loop: Evaluate on query set with adapted parameters
+                query_outputs = self.model(query_images, query_texts, query_rules)
+                query_loss = F.binary_cross_entropy_with_logits(query_outputs, query_targets)
+                
+                # Compute meta-gradients (gradients of query loss w.r.t. original parameters)
+                meta_grads = torch.autograd.grad(
+                    query_loss,
+                    original_params.values(),
+                    retain_graph=False
+                )
+                
+                # Accumulate meta-gradients
+                for (name, _), meta_grad in zip(original_params.items(), meta_grads):
+                    meta_gradients[name] += meta_grad / meta_batch_size
+            
+            # Meta-update: Apply accumulated meta-gradients to original parameters
+            with torch.no_grad():
+                for name, param in self.model.named_parameters():
+                    param.copy_(original_params[name])  # Reset to original
+                    param.data -= outer_lr * meta_gradients[name]  # Apply meta-gradient
+            
+            # Update symbolic controller with meta-learned features
+            if hasattr(self, 'symbolic_controller'):
+                # Extract meta-features for symbolic reasoning enhancement
+                with torch.no_grad():
+                    meta_features = torch.cat([
+                        torch.stack([grad.flatten() for grad in meta_gradients.values()]).mean(0)[:64]
+                    ])
+                    
+                    # Update symbolic controller's rule embeddings
+                    if hasattr(self.symbolic_controller, 'rule_embeddings'):
+                        self.symbolic_controller.rule_embeddings.weight.data += 0.001 * meta_features.unsqueeze(0)
+            
+            print(f"✅ Meta-learning step completed: {len(meta_tasks)} tasks processed")
+            
         except Exception as e:
             print(f"⚠️  Meta-learning step failed: {e}")
+            import traceback
+            traceback.print_exc()
 
 def main():
     """Main secure training function with proper NeuroSym-CML paradigm"""
