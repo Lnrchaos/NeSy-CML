@@ -1,0 +1,52 @@
+{
+  "name": "chess-neuro-symbolic-training",
+  "version": "1.0.0",
+  "description": "A hybrid neuro-symbolic approach for chess position analysis that extracts and learns from comprehensive chess literature",
+  "main": "train_chess_improved.py",
+  "scripts": {
+    "train": "python train_chess_improved.py",
+    "test": "python examples/test_chess_labeling.py",
+    "analyze": "python examples/comprehensive_chess_test.py",
+    "diagnose": "python examples/diagnose_f1_issues.py",
+    "install-deps": "pip install -r requirements.txt",
+    "setup": "pip install -r requirements.txt && python examples/test_chess_labeling.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/chess-neuro-symbolic-training.git"
+  },
+  "keywords": [
+    "chess",
+    "machine-learning",
+    "neural-networks",
+    "symbolic-ai",
+    "pytorch",
+    "neuro-symbolic",
+    "chess-analysis",
+    "pdf-processing",
+    "multi-label-classification",
+    "hybrid-ai"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/chess-neuro-symbolic-training/issues"
+  },
+  "homepage": "https://github.com/yourusername/chess-neuro-symbolic-training#readme",
+  "engines": {
+    "python": ">=3.8"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  },
+  "config": {
+    "python_version": "3.8+",
+    "pytorch_version": "2.0.0+",
+    "cuda_support": "optional"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/yourusername"
+  }
+}
