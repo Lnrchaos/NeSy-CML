@@ -5,6 +5,7 @@ from dataset_wrapper import CIFAR10Wrapper, MNISTWrapper
 from typing import Tuple, Optional, Dict, Any, List
 from text_encoder import TextEncoder
 import random
+import os
 from model_spec import ModelSpec
 import numpy as np
 
